@@ -49,12 +49,27 @@ function getAllUsers(){
     $pdo = Database::getInstance()->getConnection();
 
     $get_user_query = 'SELECT * FROM tbl_user';
-    $users = $pdo->query($get_user_query);
+    $get_user_set = $pdo->prepare($get_user_query);
+    $get_user_result = $get_user_set->execute();
 
-    if($users){
-        return $users;
-    }else{
-        return false;
+    $users = array();
+
+    if($get_user_result){
+        while($user = $get_user_set->fetch(PDO::FETCH_ASSOC)){
+            $current_user = array();
+
+            $current_user['id'] = $user['user_id'];
+            $current_user['username'] = $user['user_name'];
+            $current_user['admin'] = $user['user_admin'];
+            $current_user['access'] = $user['user_permissions'];
+            $current_user['avatar'] = $user['user_avatar'];
+
+            $users[] = $current_user;
+        }
+
+        return json_encode($users);
+    } else {
+        return 'There was an issue retrieving users!';
     }
 }
 
